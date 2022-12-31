@@ -11,6 +11,5 @@ parameters:
 	paths:
 		- src/
 		- test/
-		- rector.php
 
 	tmpDir: .build/phpstan/
