@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "8.0"
+          - "8.1"
 
         dependencies:
           - "locked"
@@ -73,7 +73,7 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "8.0"
+          - "8.1"
 
         dependencies:
           - "locked"
@@ -81,13 +81,6 @@ jobs:
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v3.2.0"
-
-      - name: "Lint YAML files"
-        uses: "ibiqlik/action-yamllint@v3.1.1"
-        with:
-          config_file: ".yamllint.yaml"
-          file_or_dir: "."
-          strict: true
 
       - name: "Set up PHP"
         uses: "shivammathur/setup-php@2.22.0"
@@ -143,7 +136,7 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "8.0"
+          - "8.1"
 
         dependencies:
           - "locked"
@@ -180,110 +173,6 @@ jobs:
       - name: "Run maglnet/composer-require-checker"
         run: ".phive/composer-require-checker check --config-file=$(pwd)/composer-require-checker.json"
 
-  mutation-tests:
-    name: "Mutation Tests"
-
-    runs-on: "ubuntu-latest"
-
-    strategy:
-      matrix:
-        php-version:
-          - "8.0"
-
-        dependencies:
-          - "locked"
-
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v3.2.0"
-
-      - name: "Set up PHP"
-        uses: "shivammathur/setup-php@2.22.0"
-        with:
-          coverage: "xdebug"
-          extensions: "none, ctype, dom, json, mbstring, phar, simplexml, tokenizer, xml, xmlwriter"
-          php-version: "${{ matrix.php-version }}"
-
-      - name: "Set up problem matchers for PHP"
-        run: "echo \"::add-matcher::${{ runner.tool_cache }}/php.json\""
-
-      - name: "Determine composer cache directory"
-        uses: "ergebnis/.github/actions/composer/determine-cache-directory@1.7.0"
-
-      - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v3.2.2"
-        with:
-          path: "${{ env.COMPOSER_CACHE_DIR }}"
-          key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-          restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-      - name: "Install ${{ matrix.dependencies }} dependencies with composer"
-        uses: "ergebnis/.github/actions/composer/install@1.7.0"
-        with:
-          dependencies: "${{ matrix.dependencies }}"
-
-      - name: "Run mutation tests with Xdebug and infection/infection"
-        env:
-          XDEBUG_MODE: "coverage"
-        run: "vendor/bin/infection --ansi --configuration=infection.json --logger-github"
-
-  refactoring:
-    name: "Refactoring"
-
-    runs-on: "ubuntu-latest"
-
-    strategy:
-      matrix:
-        php-version:
-          - "8.0"
-
-        dependencies:
-          - "locked"
-
-    steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v3.2.0"
-
-      - name: "Set up PHP"
-        uses: "shivammathur/setup-php@2.22.0"
-        with:
-          coverage: "none"
-          extensions: "none, ctype, dom, intl, json, mbstring, phar, simplexml, tokenizer, xml, xmlwriter"
-          php-version: "${{ matrix.php-version }}"
-
-      - name: "Set up problem matchers for PHP"
-        run: "echo \"::add-matcher::${{ runner.tool_cache }}/php.json\""
-
-      - name: "Determine composer cache directory"
-        uses: "ergebnis/.github/actions/composer/determine-cache-directory@1.7.0"
-
-      - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v3.2.2"
-        with:
-          path: "${{ env.COMPOSER_CACHE_DIR }}"
-          key: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-${{ hashFiles('composer.lock') }}"
-          restore-keys: "php-${{ matrix.php-version }}-composer-${{ matrix.dependencies }}-"
-
-      - name: "Install ${{ matrix.dependencies }} dependencies with composer"
-        uses: "ergebnis/.github/actions/composer/install@1.7.0"
-        with:
-          dependencies: "${{ matrix.dependencies }}"
-
-      - name: "Create cache directory for rector/rector"
-        run: "mkdir -p .build/rector"
-
-      - name: "Cache cache directory for rector/rector"
-        uses: "actions/cache@v3.2.2"
-        with:
-          path: ".build/rector"
-          key: "php-${{ matrix.php-version }}-rector-${{ github.ref_name }}"
-          restore-keys: |
-            php-${{ matrix.php-version }}-rector-main
-            php-${{ matrix.php-version }}-rector-
-
-      - name: "Run automated refactoring with rector/rector"
-        run: "vendor/bin/rector --ansi --config=rector.php --dry-run"
-
   security-analysis:
     name: "Security Analysis"
 
@@ -292,7 +181,7 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "8.0"
+          - "8.1"
 
         dependencies:
           - "locked"
@@ -325,7 +214,7 @@ jobs:
     strategy:
       matrix:
         php-version:
-          - "8.0"
+          - "8.1"
 
         dependencies:
           - "locked"
@@ -364,12 +253,6 @@ jobs:
 
       - name: "Run phpstan/phpstan"
         run: "vendor/bin/phpstan --configuration=phpstan.neon --memory-limit=-1"
-
-      - name: "Create cache directory for vimeo/psalm"
-        run: "mkdir -p .build/psalm"
-
-      - name: "Run vimeo/psalm"
-        run: "vendor/bin/psalm --config=psalm.xml --output-format=github --shepherd --show-info=false --stats --threads=4"
 
   tests:
     name: "Tests"
